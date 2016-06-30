@@ -1,1 +1,1 @@
-# StohasticCourseProject
+# Stohastic course project
