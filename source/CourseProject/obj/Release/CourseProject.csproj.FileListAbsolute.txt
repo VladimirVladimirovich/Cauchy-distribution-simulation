@@ -1,0 +1,34 @@
+D:\Study\CSandASP\Stohastic\Stohastic Course Project\CourseProject\CourseProject\obj\Release\ResolveAssemblyReference.cache
+D:\Study\CSandASP\Stohastic\Stohastic Course Project\CourseProject\CourseProject\obj\Release\CourseProject.AddNewExperimentForm.resources
+D:\Study\CSandASP\Stohastic\Stohastic Course Project\CourseProject\CourseProject\obj\Release\CourseProject.MainForm.resources
+D:\Study\CSandASP\Stohastic\Stohastic Course Project\CourseProject\CourseProject\obj\Release\CourseProject.Properties.Resources.resources
+D:\Study\CSandASP\Stohastic\Stohastic Course Project\CourseProject\CourseProject\obj\Release\CourseProject.csproj.GenerateResource.Cache
+D:\Study\CSandASP\Stohastic\Stohastic Course Project\CourseProject\CourseProject\obj\Release\CourseProject.CauchyInfoForm.resources
+D:\Study\CSandASP\Stohastic\Stohastic Course Project\CourseProject\CourseProject\obj\Release\CourseProject.DeveloperInfoForm.resources
+D:\Study\CSandASP\Stohastic\Stohastic Course Project\CourseProject\CourseProject\obj\Release\CourseProject.ShowExperimentForm.resources
+D:\Study\CSandASP\Stohastic\Stohastic Course Project\CourseProject\CourseProject\bin\Release\CourseProject.exe.config
+D:\Study\CSandASP\Stohastic\Stohastic Course Project\CourseProject\CourseProject\bin\Release\CourseProject.exe
+D:\Study\CSandASP\Stohastic\Stohastic Course Project\CourseProject\CourseProject\bin\Release\CourseProject.pdb
+D:\Study\CSandASP\Stohastic\Stohastic Course Project\CourseProject\CourseProject\obj\Release\CourseProject.exe
+D:\Study\CSandASP\Stohastic\Stohastic Course Project\CourseProject\CourseProject\obj\Release\CourseProject.pdb
+D:\Study\CSandASP\Stohastic\Stohastic Course Project\CourseProject\CourseProject\bin\Release\CourseProject.exe.manifest
+D:\Study\CSandASP\Stohastic\Stohastic Course Project\CourseProject\CourseProject\bin\Release\CourseProject.application
+D:\Study\CSandASP\Stohastic\Stohastic Course Project\CourseProject\CourseProject\obj\Release\CourseProject.exe.manifest
+D:\Study\CSandASP\Stohastic\Stohastic Course Project\CourseProject\CourseProject\obj\Release\CourseProject.application
+C:\Users\Vladimir\Desktop\Course project\Course project source\CourseProject\bin\Release\CourseProject.exe.config
+C:\Users\Vladimir\Desktop\Course project\Course project source\CourseProject\obj\Release\CourseProject.exe
+C:\Users\Vladimir\Desktop\Course project\Course project source\CourseProject\obj\Release\CourseProject.pdb
+C:\Users\Vladimir\Desktop\Course project\Course project source\CourseProject\bin\Release\CourseProject.exe.manifest
+C:\Users\Vladimir\Desktop\Course project\Course project source\CourseProject\bin\Release\CourseProject.application
+C:\Users\Vladimir\Desktop\Course project\Course project source\CourseProject\bin\Release\CourseProject.exe
+C:\Users\Vladimir\Desktop\Course project\Course project source\CourseProject\bin\Release\CourseProject.pdb
+C:\Users\Vladimir\Desktop\Course project\Course project source\CourseProject\obj\Release\ResolveAssemblyReference.cache
+C:\Users\Vladimir\Desktop\Course project\Course project source\CourseProject\obj\Release\CourseProject.AddNewExperimentForm.resources
+C:\Users\Vladimir\Desktop\Course project\Course project source\CourseProject\obj\Release\CourseProject.CauchyInfoForm.resources
+C:\Users\Vladimir\Desktop\Course project\Course project source\CourseProject\obj\Release\CourseProject.DeveloperInfoForm.resources
+C:\Users\Vladimir\Desktop\Course project\Course project source\CourseProject\obj\Release\CourseProject.MainForm.resources
+C:\Users\Vladimir\Desktop\Course project\Course project source\CourseProject\obj\Release\CourseProject.Properties.Resources.resources
+C:\Users\Vladimir\Desktop\Course project\Course project source\CourseProject\obj\Release\CourseProject.ShowExperimentForm.resources
+C:\Users\Vladimir\Desktop\Course project\Course project source\CourseProject\obj\Release\CourseProject.csproj.GenerateResource.Cache
+C:\Users\Vladimir\Desktop\Course project\Course project source\CourseProject\obj\Release\CourseProject.exe.manifest
+C:\Users\Vladimir\Desktop\Course project\Course project source\CourseProject\obj\Release\CourseProject.application
