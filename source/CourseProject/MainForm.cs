@@ -67,7 +67,7 @@ namespace CourseProject
                                 }
                             }
 
-                            reader.Close();
+                            //reader.Close();
                         }
                     }
                 }
@@ -97,16 +97,20 @@ namespace CourseProject
 
             private void addButton_Click(object sender, EventArgs e)
             {
-                AddNewExperimentForm form = new AddNewExperimentForm(this);
-                form.Show();
+                using (AddNewExperimentForm form = new AddNewExperimentForm(this))
+                {
+                    form.Show();
+                }
             }
 
             private void showButton_Click(object sender, EventArgs e)
             {
                 if (this.listBox.SelectedItem != null)
                 {
-                    ShowExperimentForm form = new ShowExperimentForm(this.experimentsList[this.listBox.SelectedIndex]);
-                    form.Show();
+                    using (ShowExperimentForm form = new ShowExperimentForm(this.experimentsList[this.listBox.SelectedIndex]))
+                    {
+                        form.Show();
+                    }
                 }
             }
 
@@ -141,8 +145,10 @@ namespace CourseProject
 
                 if (index != System.Windows.Forms.ListBox.NoMatches)
                 {
-                    ShowExperimentForm form = new ShowExperimentForm(experimentsList[listBox.SelectedIndex]);
-                    form.Show();
+                    using (ShowExperimentForm form = new ShowExperimentForm(experimentsList[listBox.SelectedIndex]))
+                    {
+                        form.Show();
+                    }
                 }
             }
 
@@ -153,14 +159,18 @@ namespace CourseProject
 
             private void cauchyDistributionToolStripMenuItem_Click(object sender, EventArgs e)
             {
-                CauchyInfoForm form = new CauchyInfoForm();
-                form.Show();
+                using (CauchyInfoForm form = new CauchyInfoForm())
+                {
+                    form.Show();
+                }
             }
 
             private void developerToolStripMenuItem_Click(object sender, EventArgs e)
             {
-                DeveloperInfoForm form = new DeveloperInfoForm();
-                form.Show();
+                using (DeveloperInfoForm form = new DeveloperInfoForm())
+                {
+                    form.Show();
+                }
             } 
         #endregion
     }
