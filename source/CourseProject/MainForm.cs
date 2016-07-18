@@ -14,7 +14,7 @@ namespace CourseProject
 {
     public partial class MainForm : Form
     {
-        #region PrivateFields
+        #region Private fields
             private DataInput dataInput;
             private AnalyticMethod analyticMethod;
             private InverseFunctionMethod inverseFunctionMethod;
@@ -24,17 +24,21 @@ namespace CourseProject
             private List<int> idList = new List<int>(); 
         #endregion
 
+        #region Private constants
+            private const string listBoxItemString = "{0}) Experiments = {1}, partitions = {2}, y = {3}, [{4};{5}] {6} {7} {8}"; 
+        #endregion
+
         #region Contructors
             public MainForm()
             {
                 InitializeComponent();
 
-                this.loadExperimentsFromDB();
+                this.LoadExperimentsFromDB();
             } 
         #endregion
 
-        #region PublicMethods
-            public void loadExperimentsFromDB()
+        #region Public methods
+            public void LoadExperimentsFromDB()
             {
                 this.idList.Clear();
 
@@ -66,36 +70,38 @@ namespace CourseProject
                                     this.experimentsList.Add(new Experiment(dataInput, analyticMethod, inverseFunctionMethod, neymanMethod, metropolisMethod));
                                 }
                             }
-
-                            //reader.Close();
                         }
                     }
                 }
 
-                this.fillListBox();
+                this.FillListBox();
             }
             
         #endregion
 
-        #region PrivateMethods
-            private void fillListBox()
+        #region Private methods
+            private void FillListBox()
             {
                 this.listBox.Items.Clear();
 
                 for (int i = 0; i < this.experimentsList.Count; i++)
                 {
-                    String text = (i + 1) + ") Experiments = " + this.experimentsList[i].dataInput.actualExperimentsAmount + ", partitions = " +
-                        this.experimentsList[i].dataInput.partitionsAmount + ", y = " + this.experimentsList[i].dataInput.gamma +
-                        ", [" + this.experimentsList[i].dataInput.intervalBegin + ";" + this.experimentsList[i].dataInput.intervalEnd +
-                        "]" + (this.experimentsList[i].dataInput.isInverseFunctionChecked ? ", Inverse function" : "") +
-                        (this.experimentsList[i].dataInput.isNeymanChecked ? ", Neumann" : "") +
-                        (this.experimentsList[i].dataInput.isMetropolisChecked ? ", Metropolis" : "");
+                    object [] parameters = { i + 1, this.experimentsList[i].dataInput.actualExperimentsAmount, 
+                                               this.experimentsList[i].dataInput.partitionsAmount,
+                                               this.experimentsList[i].dataInput.gamma,
+                                               this.experimentsList[i].dataInput.intervalBegin,
+                                               this.experimentsList[i].dataInput.intervalEnd,
+                                               (this.experimentsList[i].dataInput.isInverseFunctionChecked ? ", Inverse function" : ""),
+                                               (this.experimentsList[i].dataInput.isNeymanChecked ? ", Neumann" : ""),
+                                               (this.experimentsList[i].dataInput.isMetropolisChecked ? ", Metropolis" : "")
+                                           };
 
-                    this.listBox.Items.Add(text);
+                    String item = String.Format(MainForm.listBoxItemString, parameters);
+                    this.listBox.Items.Add(item);
                 }
             }
 
-            private void addButton_Click(object sender, EventArgs e)
+            private void AddButton_Click(object sender, EventArgs e)
             {
                 using (AddNewExperimentForm form = new AddNewExperimentForm(this))
                 {
@@ -103,7 +109,7 @@ namespace CourseProject
                 }
             }
 
-            private void showButton_Click(object sender, EventArgs e)
+            private void ShowButton_Click(object sender, EventArgs e)
             {
                 if (this.listBox.SelectedItem != null)
                 {
@@ -114,7 +120,7 @@ namespace CourseProject
                 }
             }
 
-            private void deleteButton_Click(object sender, EventArgs e)
+            private void DeleteButton_Click(object sender, EventArgs e)
             {
                 if (this.listBox.SelectedItem == null)
                     return;
@@ -130,7 +136,7 @@ namespace CourseProject
 
                         if (command.ExecuteNonQuery() == 1)
                         {
-                            this.loadExperimentsFromDB();
+                            this.LoadExperimentsFromDB();
                             return;
                         }
                         else
@@ -139,7 +145,7 @@ namespace CourseProject
                 }
             }
 
-            private void listBox_MouseDoubleClick(object sender, MouseEventArgs e)
+            private void ListBox_MouseDoubleClick(object sender, MouseEventArgs e)
             {
                 int index = this.listBox.IndexFromPoint(e.Location);
 
@@ -152,12 +158,12 @@ namespace CourseProject
                 }
             }
 
-            private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+            private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
             {
                 this.Close();
             }
 
-            private void cauchyDistributionToolStripMenuItem_Click(object sender, EventArgs e)
+            private void CauchyDistributionToolStripMenuItem_Click(object sender, EventArgs e)
             {
                 using (CauchyInfoForm form = new CauchyInfoForm())
                 {
@@ -165,7 +171,7 @@ namespace CourseProject
                 }
             }
 
-            private void developerToolStripMenuItem_Click(object sender, EventArgs e)
+            private void DeveloperToolStripMenuItem_Click(object sender, EventArgs e)
             {
                 using (DeveloperInfoForm form = new DeveloperInfoForm())
                 {
