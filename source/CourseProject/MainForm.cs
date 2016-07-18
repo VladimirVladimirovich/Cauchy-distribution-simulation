@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -14,13 +14,13 @@ namespace CourseProject
 {
     public partial class MainForm : Form
     {
-        public DataInput dataInput;
-        public AnalyticMethod analyticMethod;
-        public InverseFunctionMethod inverseFunctionMethod;
-        public NeymanMethod neymanMethod;
-        public MetropolisMethod metropolisMethod;
-        public List<Experiment> experimentsList;
-        public List<int> idList = new List<int>();
+        private DataInput dataInput;
+        private AnalyticMethod analyticMethod;
+        private InverseFunctionMethod inverseFunctionMethod;
+        private NeymanMethod neymanMethod;
+        private MetropolisMethod metropolisMethod;
+        private List<Experiment> experimentsList;
+        private List<int> idList = new List<int>();
 
         public MainForm()
         {
@@ -33,34 +33,36 @@ namespace CourseProject
         {
             idList.Clear();
 
-            SQLiteConnection connection = new SQLiteConnection("Data Source=Experiments.sqlite3");
-            connection.Open();
-
-            SQLiteCommand command = connection.CreateCommand();
-            command.CommandText = "SELECT * FROM experiment;";
-
-            SQLiteDataReader reader = command.ExecuteReader();
-
-            BinaryFormatter formatter = new BinaryFormatter();
-            MemoryStream ms;
-
-            experimentsList = new List<Experiment>();
-
-            while (reader.Read()) 
+            using (SQLiteConnection connection = new SQLiteConnection("Data Source=Experiments.sqlite3"))
             {
-                ms = new MemoryStream((byte[])reader["metropolis"]);
-                ms.Seek(0, SeekOrigin.Begin);
-                dataInput = new DataInput((DataInput)formatter.Deserialize(ms));
-                analyticMethod = new AnalyticMethod((AnalyticMethod)formatter.Deserialize(ms));
-                inverseFunctionMethod = new InverseFunctionMethod((InverseFunctionMethod)formatter.Deserialize(ms));
-                neymanMethod = new NeymanMethod((NeymanMethod)formatter.Deserialize(ms));
-                metropolisMethod = new MetropolisMethod((MetropolisMethod)formatter.Deserialize(ms));
+                connection.Open();
 
-                idList.Add(int.Parse(reader["id"].ToString()));
-                experimentsList.Add(new Experiment(dataInput, analyticMethod, inverseFunctionMethod, neymanMethod, metropolisMethod));                
+                SQLiteCommand command = connection.CreateCommand();
+                command.CommandText = "SELECT * FROM experiment;";
+
+                SQLiteDataReader reader = command.ExecuteReader();
+                BinaryFormatter formatter = new BinaryFormatter();
+          
+                experimentsList = new List<Experiment>();
+
+                while (reader.Read())
+                {
+                    using (MemoryStream ms = new MemoryStream((byte[])reader["metropolis"]))
+                    {
+                        ms.Seek(0, SeekOrigin.Begin);
+                        dataInput = new DataInput((DataInput)formatter.Deserialize(ms));
+                        analyticMethod = new AnalyticMethod((AnalyticMethod)formatter.Deserialize(ms));
+                        inverseFunctionMethod = new InverseFunctionMethod((InverseFunctionMethod)formatter.Deserialize(ms));
+                        neymanMethod = new NeymanMethod((NeymanMethod)formatter.Deserialize(ms));
+                        metropolisMethod = new MetropolisMethod((MetropolisMethod)formatter.Deserialize(ms));
+
+                        idList.Add(int.Parse(reader["id"].ToString()));
+                        experimentsList.Add(new Experiment(dataInput, analyticMethod, inverseFunctionMethod, neymanMethod, metropolisMethod));
+                    }
+                }
+
+                reader.Close();
             }
-
-            reader.Close();
 
             fillListBox();
         }
@@ -102,21 +104,23 @@ namespace CourseProject
             if (listBox.SelectedItem == null)
                 return;
 
-            SQLiteConnection connection = new SQLiteConnection("Data Source=Experiments.sqlite3");
-            connection.Open();
-
-            SQLiteCommand command = connection.CreateCommand();
-            command.CommandText = "DELETE FROM experiment WHERE id = @id;";
-
-            command.Parameters.Add(new SQLiteParameter("id", idList[listBox.SelectedIndex]));
-
-            if (command.ExecuteNonQuery() == 1)
+            using (SQLiteConnection connection = new SQLiteConnection("Data Source=Experiments.sqlite3"))
             {
-                loadExperimentsFromDB();
-                return;
+                connection.Open();
+
+                SQLiteCommand command = connection.CreateCommand();
+                command.CommandText = "DELETE FROM experiment WHERE id = @id;";
+
+                command.Parameters.Add(new SQLiteParameter("id", idList[listBox.SelectedIndex]));
+
+                if (command.ExecuteNonQuery() == 1)
+                {
+                    loadExperimentsFromDB();
+                    return;
+                }
+                else
+                    MessageBox.Show("Error while deleting experiment!");
             }
-            else
-                MessageBox.Show("Error while deleting experiment!");
         }
 
         private void listBox_MouseDoubleClick(object sender, MouseEventArgs e)
