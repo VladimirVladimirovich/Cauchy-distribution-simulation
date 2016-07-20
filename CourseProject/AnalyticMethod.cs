@@ -37,24 +37,11 @@ namespace CourseProject
                 this.intervalsList.Add(i);
                 this.resultList.Add(this.GetPDF(i));
             }
-        }
-
-        public AnalyticMethod(AnalyticMethod analyticMethod)
-        {
-            this.gamma = analyticMethod.gamma;
-            this.intervalBegin = analyticMethod.intervalBegin;
-            this.intervalEnd = analyticMethod.intervalEnd;
-            this.x0 = analyticMethod.x0;
-            this.resultList = new List<double>(analyticMethod.resultList);
-            this.intervalsList = new List<double>(analyticMethod.intervalsList);
         } 
         #endregion
 
         #region Public methods
-        public double GetPDF(double value)
-        {
-            return 1 / (Math.PI * this.gamma * (1 + Math.Pow((value - this.x0) / this.gamma, 2)));
-        }
+        
 
         public List<double> GetResultList() { return this.resultList; }
         public List<double> GetIntervalsList() { return this.intervalsList; } 
