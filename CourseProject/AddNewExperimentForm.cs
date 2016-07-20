@@ -145,7 +145,7 @@ namespace CourseProject
 
         private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            //this.experiment.DataInput.ActualExperimentsAmount = this.actualExperimentAmount;
+            this.experiment.DataInput.ActualExperimentsAmount = this.actualExperimentAmount;
             this.experiment.FillIntervalsList();
             this.DrawChart();
 

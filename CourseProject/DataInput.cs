@@ -10,7 +10,7 @@ namespace CourseProject
     {
         #region Auto-properties
         public int ExperimentsAmount { get; private set; }
-        public int ActualExperimentsAmount { get; private set; }
+        public int ActualExperimentsAmount { get; set; }
         public int PartitionsAmount { get; private set; }
         public double Gamma { get; private set; }
         public int IntervalBegin { get; private set; }
