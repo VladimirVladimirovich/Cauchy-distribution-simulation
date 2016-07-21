@@ -9,23 +9,26 @@ namespace CourseProject
     public class InverseFunctionMethod : Method
     {
         #region Constructors
-        public InverseFunctionMethod(int experimentsAmount, int partitionsAmount, double gamma, double intervalBegin, double intervalEnd, double x0) : base(experimentsAmount, partitionsAmount, gamma, intervalBegin, intervalEnd, x0)
-        {
-        } 
+        public InverseFunctionMethod (int experimentsAmount, 
+            int partitionsAmount, double gamma, double intervalBegin, double intervalEnd,
+            double x0) : base(experimentsAmount, partitionsAmount, gamma, intervalBegin, intervalEnd, x0) { } 
         #endregion
 
         #region Public methods
+        public override void ExecuteMethod()
+        {
+            double value = this.GetRandomValue(this.random.NextDouble());
+
+            if (value > this.intervalBegin && value < this.intervalEnd)
+                this.InsertNewValue(value);
+        }
+
         public void InsertNewValue(double value)
         {
             base.InsertNewValue(value);
         }
 
-        public override void ExecuteMethod()
-        {
-            
-        }
-
-        public List<double> GetResultList()
+        /*public List<double> GetResultList()
         {
             return base.GetResultList();
         }
@@ -43,7 +46,7 @@ namespace CourseProject
         public List<double> GetAnalyticIntervalsList()
         {
             return base.GetAnalyticIntervalsList();
-        }
+        }*/
 
         public double GetPDF(double value)
         {

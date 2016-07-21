@@ -111,11 +111,11 @@ namespace CourseProject
                     break;
 
                 if (this.inverseCheckBox.Checked)
-                    this.experiment.ExecuteInverseMethod(AddNewExperimentForm.random);
+                    this.experiment.ExecuteInverseMethod(AddNewExperimentForm.random.NextDouble();
                 if (this.neymanCheckBox.Checked)
-                    this.experiment.ExecuteNeymanMethod(i, AddNewExperimentForm.random);
+                    this.experiment.ExecuteNeymanMethod(i, AddNewExperimentForm.random.NextDouble());
                 if (this.metropolisCheckBox.Checked)
-                    this.experiment.ExecuteMetropolisMethod(AddNewExperimentForm.random);
+                    this.experiment.ExecuteMetropolisMethod(AddNewExperimentForm.random.NextDouble());
 
                 if (i % step == 0)
                     ((BackgroundWorker)sender).ReportProgress((i * 100) / this.experiment.DataInput.ExperimentsAmount, this.actualExperimentAmount);
