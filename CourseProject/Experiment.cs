@@ -11,6 +11,10 @@ namespace CourseProject
         #region Private fields
         private DataInput dataInput;
         private Dictionary<string, Method> methods;
+
+        private const string inverseFunctionKey = "Inverse function";
+        private const string neymanStringKey = "Neyman";
+        private const string metropolisStringKey = "Metropolis";
         #endregion
 
         #region Constructor
@@ -20,11 +24,23 @@ namespace CourseProject
             this.methods = new Dictionary<string, Method>();
 
             if (this.dataInput.IsInverseFunctionChecked)
-                this.methods.Add("Inverse function", new InverseFunctionMethod(dataInput));
+            {
+                InverseFunctionMethod inverseMethod = new InverseFunctionMethod(inverseFunctionKey, dataInput);
+                inverseMethod.OnComplete += this.MethodWorkComplete;
+                this.methods.Add(inverseFunctionKey, inverseMethod);
+            }
             if (this.dataInput.IsNeymanChecked)
-                this.methods.Add("Neyman", new NeymanMethod(dataInput));
+            {
+                NeymanMethod neymanMethod = new NeymanMethod(neymanStringKey, dataInput);
+                neymanMethod.OnComplete += this.MethodWorkComplete;
+                this.methods.Add(neymanStringKey, neymanMethod);
+            }
             if (this.dataInput.IsMetropolisChecked)
-                this.methods.Add("Metropolis", new MetropolisMethod(dataInput));
+            {
+                MetropolisMethod metropolisMethod = new MetropolisMethod(metropolisStringKey, dataInput);
+                metropolisMethod.OnComplete += this.MethodWorkComplete;
+                this.methods.Add(metropolisStringKey, metropolisMethod);
+            }
         }
         #endregion
 
@@ -44,6 +60,9 @@ namespace CourseProject
             }
         } 
         #endregion
+
+        public delegate void DrawChartEventHandler(String methodName);
+        public event DrawChartEventHandler DrawChart;
 
         #region Public properties
         public DataInput DataInput 
@@ -68,21 +87,24 @@ namespace CourseProject
         {
             foreach (KeyValuePair<string, Method> pair in methods)
             {
-                pair.Value.RunBackgroundWorker();
+                pair.Value.RunWorkAsync();
             }
         }
 
-        public bool IsWorkFinished()
+        public void MethodWorkComplete(Method sender)
         {
-            foreach (KeyValuePair<string, Method> pair in methods)
+            if (sender.IsCancelled)
             {
-                if (!pair.Value.IsWorkFinished)
-                    return false;
+                
             }
-
-            this.DisposeBackgroundWorkers();
-
-            return true;
+            else if (sender.Error != null)
+            {
+                
+            }
+            else
+            {
+                DrawChart(sender.Name);
+            }
         }
 
         public IEnumerable<double> GetResultList(string methodName)

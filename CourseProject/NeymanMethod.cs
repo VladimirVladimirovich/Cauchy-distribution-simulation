@@ -13,7 +13,7 @@ namespace CourseProject
         #endregion
 
         #region Constructor
-        public NeymanMethod(DataInput dataInput) : base(dataInput) 
+        public NeymanMethod(string name, DataInput dataInput) : base(name, dataInput) 
         { 
             this.even = true; 
         }

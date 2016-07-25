@@ -8,7 +8,7 @@ namespace CourseProject
     public class InverseFunctionMethod : Method
     {
         #region Constructor
-        public InverseFunctionMethod (DataInput dataInput) : base(dataInput) { } 
+        public InverseFunctionMethod (string name, DataInput dataInput) : base(name, dataInput) { } 
         #endregion
 
         #region Private methods

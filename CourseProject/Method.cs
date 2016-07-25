@@ -13,8 +13,10 @@ namespace CourseProject
         #region Private fields
         private BackgroundWorker worker;
 
-        private bool isWorkFinished;
         private bool disposed;
+        private bool isDisposing;
+        private bool isCancelled;
+        private Exception error;
 
         private List<double> resultList;
         private List<double> intervalsList;
@@ -33,12 +35,39 @@ namespace CourseProject
             this.worker.DoWork += new DoWorkEventHandler(BackgroundWorker_DoWork);
             this.worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(BackgroundWorker_RunWorkerCompleted);
             this.worker.ProgressChanged += new ProgressChangedEventHandler(BackgroundWorker_ProgressChanged);
-        } 
+        }
+
+        private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            for (int i = 0; i < this.experimentsAmount; i++)
+            {
+                if (this.worker.CancellationPending)
+                    break;
+
+                this.ExecuteMethod();
+            }
+
+            this.FillIntervalsList();
+        }
+
+        private void BackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+
+        }
+
+        private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            this.error = e.Error;
+            this.isCancelled = e.Cancelled;
+
+            this.OnComplete(this);
+        }
         #endregion
 
         #region Protected fields
         protected Random random;
 
+        protected string name;
         protected int experimentsAmount;
         protected int partitionsAmount;
         protected double gamma;
@@ -51,20 +80,23 @@ namespace CourseProject
         #endregion
 
         #region Constructor
-        public Method(DataInput dataInput)
+        public Method(string name, DataInput dataInput)
         {
             this.InitializeBackgroundWorker();
 
             this.random = new Random();
 
-            this.isWorkFinished = false;
             this.disposed = false;
+            this.isDisposing = false;
+            this.isCancelled = false;
+            this.error = null;
 
             this.resultList = new List<double>(new double[dataInput.PartitionsAmount]);
             this.intervalsList = new List<double>();
             this.analyticResultList = new List<double>();
             this.analyticIntervalsList = new List<double>();
 
+            this.name = name;
             this.experimentsAmount = dataInput.ExperimentsAmount;
             this.partitionsAmount = dataInput.PartitionsAmount;
             this.gamma = dataInput.Gamma;
@@ -88,39 +120,6 @@ namespace CourseProject
 
         #region Protected methods
         protected abstract void ExecuteMethod();
-
-        private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            for (int i = 0; i < this.experimentsAmount; i++)
-            {
-                if (this.worker.CancellationPending)
-                    break;
-
-                this.ExecuteMethod();
-            }
-        }
-
-        private void BackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-
-        }
-
-        private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            if (e.Cancelled)
-            {
-                System.Windows.Forms.MessageBox.Show("BackgroundWorker was cancelled!");
-            }
-            else if (!(e.Error == null))
-            {
-                System.Windows.Forms.MessageBox.Show("Error occured during backgroundworker's execution!");
-            }
-            else
-            {
-                this.FillIntervalsList();
-                this.isWorkFinished = true;
-            } 
-        }
 
         protected void InsertNewValue(double value)
         {
@@ -170,14 +169,35 @@ namespace CourseProject
         }
         #endregion
 
+        #region Public fields
+        public delegate void ComleteWorkEventHandler(Method sender);
+        public event ComleteWorkEventHandler OnComplete; 
+        #endregion
+
         #region Public properties
-        public bool IsWorkFinished
+        public string Name
         {
             get
             {
-                return this.isWorkFinished;
+                return this.name;
             }
         }
+        public bool IsCancelled
+        {
+            get
+            {
+                return this.isCancelled;
+            }
+        }
+
+        public Exception Error
+        {
+            get
+            {
+                return this.error;
+            }
+        }
+
         public IEnumerable<double> ResultList
         {
             get
@@ -215,6 +235,11 @@ namespace CourseProject
         #region Public methods
         public void Dispose()
         {
+            if (this.isDisposing)
+                return;
+
+            this.isDisposing = true;
+
             try
             {
                 if (this.disposed)
@@ -224,10 +249,7 @@ namespace CourseProject
                 {
                     this.OnDispose();
                 }
-                catch (Exception e) 
-                {
-                    System.Console.WriteLine(e.Message); 
-                }
+                catch (Exception e) { }
 
                 this.worker.Dispose();
             }
@@ -238,7 +260,7 @@ namespace CourseProject
             }
         }
 
-        public void RunBackgroundWorker()
+        public void RunWorkAsync()
         {
             this.worker.RunWorkerAsync();
         }

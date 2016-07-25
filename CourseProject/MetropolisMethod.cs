@@ -8,7 +8,7 @@ namespace CourseProject
     public class MetropolisMethod : Method
     {
         #region Constructor
-        public MetropolisMethod(DataInput dataInput) : base(dataInput) { }
+        public MetropolisMethod(string name, DataInput dataInput) : base(name, dataInput) { }
         #endregion
 
         #region Protected methods

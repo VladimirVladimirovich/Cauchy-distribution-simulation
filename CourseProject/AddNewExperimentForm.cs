@@ -53,6 +53,7 @@ namespace CourseProject
             this.saveButton.Enabled = false;
 
             this.experiment = new Experiment(this.dataInput);
+            this.experiment.DrawChart += this.DrawChart;
 
             this.backgroundWorker.RunWorkerAsync();
         }
@@ -96,14 +97,6 @@ namespace CourseProject
         private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             this.experiment.LaunchExperiment();
-
-            while (true)
-            {
-                if (this.experiment.IsWorkFinished())
-                {
-                    break;
-                }
-            }
         }
 
         private void BackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -133,12 +126,10 @@ namespace CourseProject
                 this.pauseButton.Text = "PAUSE";
 
                 this.SetButtonsEnable(false);
-
-                this.DrawChart();
             }
         }
 
-        private void DrawChart()
+        private void DrawChart(string methodName)
         {
             this.tabControl.TabPages[0].Enabled = false;
             this.tabControl.TabPages[1].Enabled = false;
@@ -153,7 +144,7 @@ namespace CourseProject
             this.metropolisChart.Series[0].Points.Clear();
             this.metropolisChart.Series[1].Points.Clear();
 
-            if (this.dataInput.IsInverseFunctionChecked)
+            if (methodName.Equals(AddNewExperimentForm.inverseFunctionString))
             {
                 this.tabControl.TabPages[0].Enabled = true;
 
@@ -164,7 +155,7 @@ namespace CourseProject
                 this.inverseFunctionChart.Series[1].Points.DataBindXY(this.experiment.GetIntervalsList(inverseFunctionString), this.experiment.GetResultList(inverseFunctionString));
             }
 
-            if (this.dataInput.IsNeymanChecked)
+            if (methodName.Equals(AddNewExperimentForm.neymanString))
             {
                 this.tabControl.TabPages[1].Enabled = true;
 
@@ -175,7 +166,7 @@ namespace CourseProject
                 this.neymanChart.Series[1].Points.DataBindXY(this.experiment.GetIntervalsList(neymanString), this.experiment.GetResultList(neymanString));
             }
 
-            if (this.dataInput.IsMetropolisChecked)
+            if (methodName.Equals(AddNewExperimentForm.metropolisString))
             {
                 this.tabControl.TabPages[2].Enabled = true;
 
