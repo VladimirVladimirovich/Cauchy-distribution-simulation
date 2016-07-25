@@ -16,67 +16,22 @@ namespace CourseProject
     {
         #region Private fields
         private DataInput dataInput;
-        private AnalyticMethod analyticMethod;
         private InverseFunctionMethod inverseFunctionMethod;
         private NeymanMethod neymanMethod;
         private MetropolisMethod metropolisMethod;
         private List<Experiment> experimentsList;
-        private List<int> idList = new List<int>(); 
-        #endregion
+        private List<int> idList = new List<int>();
 
-        #region Private constant fields
         private const string listBoxItemString = "{0}) Experiments = {1}, partitions = {2}, y = {3}, [{4};{5}] {6} {7} {8}"; 
         #endregion
 
-        #region Contructors
+        #region Contructor
         public MainForm()
         {
             InitializeComponent();
 
-            this.LoadExperimentsFromDB();
+            //this.LoadExperimentsFromDB();
         } 
-        #endregion
-
-        #region Public methods
-        public void LoadExperimentsFromDB()
-        {
-            this.idList.Clear();
-
-            using (SQLiteConnection connection = new SQLiteConnection("Data Source=Experiments.sqlite3"))
-            {
-                connection.Open();
-
-                using (SQLiteCommand command = connection.CreateCommand())
-                {
-                    command.CommandText = "SELECT * FROM experiment;";
-
-                    using (SQLiteDataReader reader = command.ExecuteReader())
-                    {
-                        BinaryFormatter formatter = new BinaryFormatter();
-                        this.experimentsList = new List<Experiment>();
-
-                        while (reader.Read())
-                        {
-                            using (MemoryStream ms = new MemoryStream((byte[])reader["metropolis"]))
-                            {
-                                ms.Seek(0, SeekOrigin.Begin);
-                                this.dataInput = new DataInput((DataInput)formatter.Deserialize(ms));
-                                this.analyticMethod = new AnalyticMethod((AnalyticMethod)formatter.Deserialize(ms));
-                                this.inverseFunctionMethod = new InverseFunctionMethod((InverseFunctionMethod)formatter.Deserialize(ms));
-                                this.neymanMethod = new NeymanMethod((NeymanMethod)formatter.Deserialize(ms));
-                                this.metropolisMethod = new MetropolisMethod((MetropolisMethod)formatter.Deserialize(ms));
-
-                                this.idList.Add(int.Parse(reader["id"].ToString()));
-                                this.experimentsList.Add(new Experiment(dataInput, analyticMethod, inverseFunctionMethod, neymanMethod, metropolisMethod));
-                            }
-                        }
-                    }
-                }
-            }
-
-            this.FillListBox();
-        }
-            
         #endregion
 
         #region Private methods
@@ -111,7 +66,7 @@ namespace CourseProject
         {
             if (this.listBox.SelectedItem != null)
             {
-                using (ShowExperimentForm form = new ShowExperimentForm(this.experimentsList[this.listBox.SelectedIndex]))
+                using (ShowExperimentForm form = new ShowExperimentForm(this.experimentsList[this.listBox.SelectedIndex].DataInput))
                 {
                     form.Show();
                 }
@@ -146,7 +101,7 @@ namespace CourseProject
 
             if (index != System.Windows.Forms.ListBox.NoMatches)
             {
-                ShowExperimentForm form = new ShowExperimentForm(experimentsList[listBox.SelectedIndex]);
+                ShowExperimentForm form = new ShowExperimentForm(experimentsList[listBox.SelectedIndex].DataInput);
                 form.Show();
             }
         }
@@ -167,6 +122,46 @@ namespace CourseProject
             DeveloperInfoForm form = new DeveloperInfoForm();
             form.Show();
         } 
+        #endregion
+
+        #region Public methods
+        public void LoadExperimentsFromDB()
+        {
+            this.idList.Clear();
+
+            using (SQLiteConnection connection = new SQLiteConnection("Data Source=Experiments.sqlite3"))
+            {
+                connection.Open();
+
+                using (SQLiteCommand command = connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT * FROM experiment;";
+
+                    using (SQLiteDataReader reader = command.ExecuteReader())
+                    {
+                        BinaryFormatter formatter = new BinaryFormatter();
+                        this.experimentsList = new List<Experiment>();
+
+                        while (reader.Read())
+                        {
+                            using (MemoryStream ms = new MemoryStream((byte[])reader["metropolis"]))
+                            {
+                                ms.Seek(0, SeekOrigin.Begin);
+                                this.dataInput = (DataInput)formatter.Deserialize(ms);
+                                this.inverseFunctionMethod = (InverseFunctionMethod)formatter.Deserialize(ms);
+                                this.neymanMethod = (NeymanMethod)formatter.Deserialize(ms);
+                                this.metropolisMethod = (MetropolisMethod)formatter.Deserialize(ms);
+
+                                this.idList.Add(int.Parse(reader["id"].ToString()));
+                                this.experimentsList.Add(new Experiment(dataInput));
+                            }
+                        }
+                    }
+                }
+            }
+
+            this.FillListBox();
+        }
         #endregion
     }
 }

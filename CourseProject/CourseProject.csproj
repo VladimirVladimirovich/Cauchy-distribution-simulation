@@ -103,7 +103,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AnalyticMethod.cs" />
     <Compile Include="CauchyInfoForm.cs">
       <SubType>Form</SubType>
     </Compile>

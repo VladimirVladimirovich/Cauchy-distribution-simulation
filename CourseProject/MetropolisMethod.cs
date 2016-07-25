@@ -5,30 +5,22 @@ using System.Text;
 
 namespace CourseProject
 {
-    [Serializable]
     public class MetropolisMethod : Method
     {
-        #region Constructors
-        public MetropolisMethod(int experimentsAmount, 
-            int partitionsAmount, double gamma, double intervalBegin, double intervalEnd,
-            double x0) : base(experimentsAmount, partitionsAmount, gamma, intervalBegin, intervalEnd, x0) { }
+        #region Constructor
+        public MetropolisMethod(DataInput dataInput) : base(dataInput) { }
         #endregion
 
-        #region Public methods
-        public override void InsertNewValue(double value)
-        {
-            base.InsertNewValue(value);
-        }
-
-        public override void ExecuteMethod()
+        #region Protected methods
+        protected override void ExecuteMethod()
         {
             double metropolisValue = 0.0;
-            double lastXDistance = random.NextDouble();
+            double lastXDistance = this.random.NextDouble();
             double alphaXDistance = (this.intervalEnd - this.intervalBegin) / 2.0;
 
             while (true)
             {
-                double curXDistance = lastXDistance + alphaXDistance * (-1.0 + 2.0 * random.NextDouble());
+                double curXDistance = lastXDistance + alphaXDistance * (-1.0 + 2.0 * this.random.NextDouble());
 
                 if (curXDistance < this.intervalBegin || curXDistance > this.intervalEnd)
                     continue;
@@ -47,7 +39,7 @@ namespace CourseProject
                     }
                     else if (attitude < 1.0)
                     {
-                        if (random.NextDouble() < attitude)
+                        if (this.random.NextDouble() < attitude)
                         {
                             metropolisValue = curXDistance;
                             lastXDistance = curXDistance;
@@ -61,28 +53,9 @@ namespace CourseProject
             }
         }
 
-        /*public List<double> GetResultList()
+        protected override void Dispose(bool disposing)
         {
-            return base.GetResultList();
-        }
-
-        public List<double> GetIntervalsList() 
-        { 
-            return base.GetIntervalsList();
-        }
-        public List<double> GetAnalyticResultList()
-        {
-            return base.GetAnalyticResultList();
-        }
-
-        public List<double> GetAnalyticIntervalsList()
-        {
-            return base.GetAnalyticIntervalsList();
-        }*/
-
-        public double GetPDF(double value)
-        {
-            return base.GetPDF(value);
+            base.Dispose(disposing);
         }
         #endregion
     }

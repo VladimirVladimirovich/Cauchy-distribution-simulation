@@ -5,17 +5,21 @@ using System.Text;
 
 namespace CourseProject
 {
-    [Serializable]
     public class InverseFunctionMethod : Method
     {
-        #region Constructors
-        public InverseFunctionMethod (int experimentsAmount, 
-            int partitionsAmount, double gamma, double intervalBegin, double intervalEnd,
-            double x0) : base(experimentsAmount, partitionsAmount, gamma, intervalBegin, intervalEnd, x0) { } 
+        #region Constructor
+        public InverseFunctionMethod (DataInput dataInput) : base(dataInput) { } 
         #endregion
 
-        #region Public methods
-        public override void ExecuteMethod()
+        #region Private methods
+        private double GetRandomValue(double x)
+        {
+            return this.x0 + this.gamma * Math.Tan(Math.PI * (x - 0.5));
+        }
+        #endregion   
+
+        #region Protected methods
+        protected override void ExecuteMethod()
         {
             double value = this.GetRandomValue(this.random.NextDouble());
 
@@ -23,40 +27,10 @@ namespace CourseProject
                 this.InsertNewValue(value);
         }
 
-        public void InsertNewValue(double value)
+        protected override void Dispose(bool disposing)
         {
-            base.InsertNewValue(value);
+            base.Dispose(disposing);
         }
-
-        /*public List<double> GetResultList()
-        {
-            return base.GetResultList();
-        }
-
-        public List<double> GetIntervalsList()
-        { 
-            return base.GetIntervalsList();
-        }
-
-        public List<double> GetAnalyticResultList()
-        {
-            return base.GetAnalyticResultList();
-        }
-
-        public List<double> GetAnalyticIntervalsList()
-        {
-            return base.GetAnalyticIntervalsList();
-        }*/
-
-        public double GetPDF(double value)
-        {
-            return base.GetPDF(value);
-        }
-
-        public double GetRandomValue(double x)
-        {
-            return this.x0 + this.gamma * Math.Tan(Math.PI * (x - 0.5));
-        }        
         #endregion
     }
 }

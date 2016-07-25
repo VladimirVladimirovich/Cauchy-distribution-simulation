@@ -3,89 +3,78 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel;
 
 namespace CourseProject
 {
-    public class Method
+    [Serializable]
+    public abstract class Method : IDisposable
     {
+        #region Private fields
+        private BackgroundWorker worker;
+
+        private bool isWorkFinished;
+        private bool disposed;
+
+        private List<double> resultList;
+        private List<double> intervalsList;
+        private List<double> analyticResultList;
+        private List<double> analyticIntervalsList;
+        #endregion
+
+        #region Private methods
+        private void InitializeBackgroundWorker()
+        {
+            this.worker = new BackgroundWorker();
+
+            this.worker.WorkerReportsProgress = true;
+            this.worker.WorkerSupportsCancellation = true;
+
+            this.worker.DoWork += new DoWorkEventHandler(BackgroundWorker_DoWork);
+            this.worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(BackgroundWorker_RunWorkerCompleted);
+            this.worker.ProgressChanged += new ProgressChangedEventHandler(BackgroundWorker_ProgressChanged);
+        } 
+        #endregion
+
         #region Protected fields
+        protected Random random;
+
         protected int experimentsAmount;
         protected int partitionsAmount;
         protected double gamma;
         protected double intervalBegin;
         protected double intervalEnd;
         protected double intervalDelta;
+        protected double x0;
         protected double leftZone;
         protected double rightZone;
-        protected double x0;
-        protected Random random;
         #endregion
 
-        #region Private fields
-        private List<double> resultList;
-        private List<double> intervalsList;
-        private List<double> analyticResultList;
-        private List<double> analyticIntervalsList; 
-        #endregion
-
-        #region Public properties
-        public List<double> ResultList
+        #region Constructor
+        public Method(DataInput dataInput)
         {
-            get
-            {
-                double max = this.resultList.Max();
-                AnalyticMethod analytic = new AnalyticMethod(this.gamma, this.intervalBegin, this.intervalEnd, this.x0);
-                double maxAnalytic = analytic.GetResultList().Max();
+            this.InitializeBackgroundWorker();
 
-                for (int i = 0; i < this.resultList.Count; i++)
-                    this.resultList[i] = (this.resultList[i] / max) * maxAnalytic;
+            this.random = new Random();
 
-                return this.resultList;
-            }
-        }
+            this.isWorkFinished = false;
+            this.disposed = false;
 
-        public List<double> IntervalsList
-        {
-            get
-            {
-                return this.intervalsList;
-            }
-        }
-
-        public List<double> AnalyticResultList
-        {
-            get
-            {
-                return this.analyticResultList;
-            }
-        }
-
-        public List<double> AnalyticIntervalsList
-        {
-            get
-            {
-                return this.analyticIntervalsList;
-            }
-        } 
-        #endregion
-
-        #region Public methods
-        public Method(int experimentsAmount, int partitionsAmount, double gamma, double intervalBegin, double intervalEnd, double x0) 
-        {
-            this.experimentsAmount = experimentsAmount;
-            this.partitionsAmount = partitionsAmount;
-            this.gamma = gamma;
-            this.intervalBegin = intervalBegin;
-            this.intervalEnd = intervalEnd;
-            this.x0 = x0;
-            this.intervalDelta = (this.intervalEnd - this.intervalBegin) / (double)this.partitionsAmount;
-            this.leftZone = this.intervalBegin;
-            this.rightZone = this.intervalBegin + this.intervalDelta;
-
-            this.resultList = new List<double>(this.partitionsAmount);
+            this.resultList = new List<double>(new double[dataInput.PartitionsAmount]);
             this.intervalsList = new List<double>();
             this.analyticResultList = new List<double>();
             this.analyticIntervalsList = new List<double>();
+
+            this.experimentsAmount = dataInput.ExperimentsAmount;
+            this.partitionsAmount = dataInput.PartitionsAmount;
+            this.gamma = dataInput.Gamma;
+            this.x0 = dataInput.X0;
+            this.intervalBegin = dataInput.IntervalBegin;
+            this.intervalEnd = dataInput.IntervalEnd;
+
+            this.intervalDelta = (this.intervalEnd - this.intervalBegin) / (double)this.partitionsAmount;
+            this.leftZone = this.intervalBegin;
+            this.rightZone = this.intervalBegin + this.intervalDelta;
 
             double delta = (this.intervalEnd - this.intervalBegin) / 1000.0;
 
@@ -95,13 +84,45 @@ namespace CourseProject
                 this.analyticResultList.Add(this.GetPDF(i));
             }
         }
+        #endregion
 
-        public virtual void ExecuteMethod()
+        #region Protected methods
+        protected abstract void ExecuteMethod();
+
+        protected void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            for (int i = 0; i < this.experimentsAmount; i++)
+            {
+                if (this.worker.CancellationPending)
+                    break;
+
+                this.ExecuteMethod();
+            }
+        }
+
+        protected void BackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
 
         }
 
-        public void InsertNewValue(double value)
+        protected void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (e.Cancelled)
+            {
+                System.Windows.Forms.MessageBox.Show("BackgroundWorker was cancelled!");
+            }
+            else if (!(e.Error == null))
+            {
+                System.Windows.Forms.MessageBox.Show("Error occured during backgroundworker's execution!");
+            }
+            else
+            {
+                this.FillIntervalsList();
+                this.isWorkFinished = true;
+            } 
+        }
+
+        protected void InsertNewValue(double value)
         {
             for (int i = 0; i < this.partitionsAmount; i++)
             {
@@ -119,35 +140,96 @@ namespace CourseProject
             this.rightZone = this.intervalBegin + this.intervalDelta;
         }
 
-        /*public virtual List<double> GetResultList()
+        protected double GetPDF(double value)
         {
+            return 1 / (Math.PI * this.gamma * (1 + Math.Pow((value - this.x0) / this.gamma, 2)));
+        } 
+
+        protected void PrepareResultList() {
             double max = this.resultList.Max();
-            AnalyticMethod analytic = new AnalyticMethod(this.gamma, this.intervalBegin, this.intervalEnd, this.x0);
-            double maxAnalytic = analytic.GetResultList().Max();
+            double maxAnalytic = this.analyticResultList.Max();
 
             for (int i = 0; i < this.resultList.Count; i++)
                 this.resultList[i] = (this.resultList[i] / max) * maxAnalytic;
-
-            return this.resultList;
         }
 
-        public virtual List<double> GetIntervalsList() 
-        { 
-            return this.intervalsList; 
-        }
-
-        public List<double> GetAnalyticResultList() 
-        { 
-            return this.analyticResultList;
-        }
-        public List<double> GetAnalyticIntervalsList() 
-        { 
-            return this.analyticIntervalsList; 
-        }*/
-
-        public double GetPDF(double value)
+        protected void FillIntervalsList()
         {
-            return 1 / (Math.PI * this.gamma * (1 + Math.Pow((value - this.x0) / this.gamma, 2)));
+            for (double i = this.intervalBegin; i < this.intervalEnd; i += this.intervalDelta)
+            {
+                this.IntervalsList.Add(i);
+            }
+
+            if (this.ResultList.Count != this.IntervalsList.Count)
+                this.IntervalsList.RemoveAt(this.IntervalsList.Count - 1);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (this.disposed)
+                return;
+
+            if (disposing)
+            {
+                this.worker.Dispose();
+            }
+
+            this.disposed = true;
+        }
+        #endregion
+
+        #region Public properties
+        public bool IsWorkFinished
+        {
+            get
+            {
+                return this.isWorkFinished;
+            }
+        }
+        public List<double> ResultList
+        {
+            get
+            {
+                this.PrepareResultList();
+                return this.resultList;
+            }
+        }
+
+        public List<double> IntervalsList
+        {
+            get
+            {
+                return this.intervalsList;
+            }
+        }
+
+        public IEnumerable<double> AnalyticResultList
+        {
+            get
+            {
+                return this.analyticResultList;
+            }
+        }
+
+        public IEnumerable<double> AnalyticIntervalsList
+        {
+            get
+            {
+                return this.analyticIntervalsList;
+            }
+        }
+        #endregion
+
+        #region Public methods
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        public void RunBackgroundWorker()
+        {
+            this.worker.RunWorkerAsync();
         }
         #endregion
     }

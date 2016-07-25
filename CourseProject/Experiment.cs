@@ -8,123 +8,140 @@ namespace CourseProject
     [Serializable]
     public class Experiment
     {
-        #region Auto-properties
-        public DataInput DataInput { get; private set; }
-        public AnalyticMethod AnalyticMethodObj { get; private set; }
-        public InverseFunctionMethod InverseFunctionMethodObj { get; private set; }
-        public NeymanMethod NeymanMethodObj { get; private set; }
-        public MetropolisMethod MetropolisMethodObj { get; private set; } 
+        #region Private fields
+        private DataInput dataInput;
+        private Dictionary<string, Method> methods;
         #endregion
 
-        public Experiment(DataInput dataInput, AnalyticMethod analyticMethodObj, InverseFunctionMethod inverseFunctionMethodObj, NeymanMethod neymanMethodObj, MetropolisMethod metropolisMethodObj) 
+        #region Constructor
+        public Experiment(DataInput dataInput)
         {
-            this.DataInput = new DataInput(dataInput);
-            this.AnalyticMethodObj = new AnalyticMethod(analyticMethodObj);
-            this.InverseFunctionMethodObj = new InverseFunctionMethod(inverseFunctionMethodObj);
-            this.NeymanMethodObj = new NeymanMethod(neymanMethodObj);
-            this.MetropolisMethodObj = new MetropolisMethod(metropolisMethodObj);
+            this.dataInput = dataInput;
+            this.methods = new Dictionary<string, Method>();
+
+            if (this.dataInput.IsInverseFunctionChecked)
+                this.methods.Add("Inverse function", new InverseFunctionMethod(dataInput));
+            if (this.dataInput.IsNeymanChecked)
+                this.methods.Add("Neyman", new NeymanMethod(dataInput));
+            if (this.dataInput.IsMetropolisChecked)
+                this.methods.Add("Metropolis", new MetropolisMethod(dataInput));
+        }
+        #endregion
+
+        #region Private methods
+        private void DisposeBackgroundWorkers()
+        {
+            foreach (KeyValuePair<string, Method> pair in this.methods)
+            {
+                try
+                {
+                    pair.Value.Dispose();
+                }
+                catch (Exception e) { System.Console.WriteLine(e.Message); }
+            }
+        } 
+        #endregion
+
+        #region Public properties
+        public DataInput DataInput 
+        {
+            get
+            {
+                return this.dataInput;
+            } 
         }
 
-        public Experiment(Experiment experiment)
+        public Dictionary<string, Method> Methods
         {
-            this.DataInput = new DataInput(experiment.DataInput);
-            this.AnalyticMethodObj = new AnalyticMethod(experiment.AnalyticMethodObj);
-            this.InverseFunctionMethodObj = new InverseFunctionMethod(experiment.InverseFunctionMethodObj);
-            this.NeymanMethodObj = new NeymanMethod(experiment.NeymanMethodObj);
-            this.MetropolisMethodObj = new MetropolisMethod(experiment.MetropolisMethodObj);
+            get
+            {
+                return this.methods;
+            }
+        }
+        #endregion
+
+        #region Public methods
+        public void LaunchExperiment()
+        {
+            foreach (KeyValuePair<string, Method> pair in methods)
+            {
+                pair.Value.RunBackgroundWorker();
+            }
         }
 
-        public void ExecuteInverseMethod(Random random)
+        public bool IsWorkFinished()
         {
-            double value = this.InverseFunctionMethodObj.GetRandomValue(random.NextDouble());
+            foreach (KeyValuePair<string, Method> pair in methods)
+            {
+                if (!pair.Value.IsWorkFinished)
+                    return false;
+            }
 
-            if (value > this.DataInput.IntervalBegin && value < this.DataInput.IntervalEnd)
-                this.InverseFunctionMethodObj.InsertNewValue(value);
+            this.DisposeBackgroundWorkers();
+
+            return true;
         }
 
-        public void ExecuteNeymanMethod(int i, Random random)
+        public IEnumerable<double> GetResultList(string methodName)
         {
-            double value = 0.0;
+            Method method;
 
-            if (this.DataInput.IntervalBegin < 0 && this.DataInput.IntervalEnd <= 0)
-                value = this.DataInput.IntervalEnd + random.NextDouble() * this.DataInput.IntervalBegin - this.DataInput.IntervalEnd;
-            else if (this.DataInput.IntervalBegin >= 0 && this.DataInput.IntervalEnd > 0)
-                value = this.DataInput.IntervalBegin + random.NextDouble() * this.DataInput.IntervalEnd - this.DataInput.IntervalBegin;
+            if (this.methods.TryGetValue(methodName, out method))
+            {
+                return method.ResultList;
+            }
             else
             {
-                if (i % 2 == 0)
-                    value = this.DataInput.IntervalEnd + random.NextDouble() * this.DataInput.IntervalBegin - this.DataInput.IntervalEnd;
-                else
-                    value = this.DataInput.IntervalBegin + random.NextDouble() * this.DataInput.IntervalEnd - this.DataInput.IntervalBegin;
+                Console.WriteLine(methodName + "not found");
+                return null;
             }
-
-            double maxValue = this.NeymanMethodObj.GetMaxValue() * random.NextDouble();
-            double analyticValue = this.AnalyticMethodObj.GetPDF(value);
-
-            if (analyticValue > maxValue)
-                this.NeymanMethodObj.InsertNewValue(value);
         }
 
-        public void ExecuteMetropolisMethod(Random random)
+        public IEnumerable<double> GetIntervalsList(string methodName)
         {
-            double metropolisValue = 0.0;
-            double lastXDistance = random.NextDouble();
-            double alphaXDistance = (this.DataInput.IntervalEnd - this.DataInput.IntervalBegin) / 2.0;
+            Method method;
 
-            while (true)
+            if (this.methods.TryGetValue(methodName, out method))
             {
-                double curXDistance = lastXDistance + alphaXDistance * (-1.0 + 2.0 * random.NextDouble());
 
-                if (curXDistance < this.DataInput.IntervalBegin || curXDistance > this.DataInput.IntervalEnd)
-                    continue;
-                else
-                {
-                    double curXDensity = this.AnalyticMethodObj.GetPDF(curXDistance);
-                    double lastXDensity = this.AnalyticMethodObj.GetPDF(lastXDistance);
-                    double attitude = curXDensity / lastXDensity;
-
-                    if (curXDensity >= lastXDensity)
-                    {
-                        metropolisValue = curXDistance;
-                        lastXDistance = curXDistance;
-                        this.MetropolisMethodObj.InsertNewValue(metropolisValue);
-                        break;
-                    }
-                    else if (attitude < 1.0)
-                    {
-                        if (random.NextDouble() < attitude)
-                        {
-                            metropolisValue = curXDistance;
-                            lastXDistance = curXDistance;
-                            this.MetropolisMethodObj.InsertNewValue(metropolisValue);
-                            break;
-                        }
-                    }
-                    else
-                        continue;
-                }
+                return method.IntervalsList;
             }
-
+            else
+            {
+                Console.WriteLine(methodName + "not found");
+                return null;
+            }
         }
 
-        public void FillIntervalsList()
+        public IEnumerable<double> GetAnalyticResultList(string methodName)
         {
-            for (double i = this.DataInput.IntervalBegin; i < this.DataInput.IntervalEnd; i += this.DataInput.XAxisStep)
+            Method method;
+
+            if (this.methods.TryGetValue(methodName, out method))
             {
-                this.InverseFunctionMethodObj.intervalsList.Add(i);
-                this.NeymanMethodObj.intervalsList.Add(i);
-                this.MetropolisMethodObj.intervalsList.Add(i);
+                return method.AnalyticResultList;
             }
-
-            if (this.InverseFunctionMethodObj.resultList.Count != this.InverseFunctionMethodObj.intervalsList.Count)
-                this.InverseFunctionMethodObj.intervalsList.RemoveAt(this.DataInput.PartitionsAmount - 1);
-
-            if (this.NeymanMethodObj.resultList.Count != this.NeymanMethodObj.intervalsList.Count)
-                this.NeymanMethodObj.intervalsList.RemoveAt(this.DataInput.PartitionsAmount - 1);
-
-            if (this.MetropolisMethodObj.resultList.Count != this.MetropolisMethodObj.intervalsList.Count)
-                this.MetropolisMethodObj.intervalsList.RemoveAt(this.DataInput.PartitionsAmount - 1);
+            else
+            {
+                Console.WriteLine(methodName + "not found");
+                return null;
+            }
         }
 
+        public IEnumerable<double> GetAnalyticIntervalsList(string methodName)
+        {
+            Method method;
+
+            if (this.methods.TryGetValue(methodName, out method))
+            {
+                return method.AnalyticIntervalsList;
+            }
+            else
+            {
+                Console.WriteLine(methodName + "not found");
+                return null;
+            }
+        } 
+        #endregion
     }
 }

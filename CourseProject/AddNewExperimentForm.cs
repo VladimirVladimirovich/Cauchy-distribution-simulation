@@ -14,24 +14,21 @@ namespace CourseProject
 {
     public partial class AddNewExperimentForm : Form
     {
-        #region Private fields;
+        #region Private fields
         private MainForm mainForm;
         private DataInput dataInput;
-        private AnalyticMethod analyticObj;
-        private InverseFunctionMethod inverseMethodObj;
-        private NeymanMethod neymanMethodObj;
-        private MetropolisMethod metropolisMethodObj;
         private Experiment experiment;
+
         private int actualExperimentAmount;
         private bool pause;
-        private bool isSaved; 
+        private bool isSaved;
+
+        private const string inverseFunctionString = "Inverse function";
+        private const string neymanString = "Neyman";
+        private const string metropolisString = "Metropolis";
         #endregion
 
-        #region Private static fields
-        private static Random random;
-        #endregion
-
-        #region Constructors
+        #region Constructor
         public AddNewExperimentForm(MainForm form)
         {
             InitializeComponent();
@@ -47,13 +44,6 @@ namespace CourseProject
             else
                 return;
 
-            AddNewExperimentForm.random = new Random();
-            this.analyticObj = new AnalyticMethod(this.dataInput.Gamma, this.dataInput.IntervalBegin, this.dataInput.IntervalEnd, this.dataInput.X0);
-            this.inverseMethodObj = new InverseFunctionMethod(this.dataInput.ExperimentsAmount, this.dataInput.PartitionsAmount, this.dataInput.Gamma, this.dataInput.IntervalBegin, this.dataInput.IntervalEnd, this.dataInput.X0);
-            this.neymanMethodObj = new NeymanMethod(this.dataInput.ExperimentsAmount, this.dataInput.PartitionsAmount, this.dataInput.Gamma, this.dataInput.IntervalBegin, this.dataInput.IntervalEnd, this.dataInput.X0);
-            this.metropolisMethodObj = new MetropolisMethod(this.dataInput.ExperimentsAmount, this.dataInput.PartitionsAmount, this.dataInput.Gamma, this.dataInput.IntervalBegin, this.dataInput.IntervalEnd, this.dataInput.X0);
-            this.experiment = new Experiment(this.dataInput, this.analyticObj, this.inverseMethodObj, this.neymanMethodObj, this.metropolisMethodObj);
-
             this.actualExperimentAmount = 0;
             this.pause = false;
             this.isSaved = false;
@@ -61,6 +51,8 @@ namespace CourseProject
             this.SetButtonsEnable(true);
             this.startButton.Enabled = false;
             this.saveButton.Enabled = false;
+
+            this.experiment = new Experiment(this.dataInput);
 
             this.backgroundWorker.RunWorkerAsync();
         }
@@ -103,35 +95,13 @@ namespace CourseProject
 
         private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            double step = this.dataInput.ExperimentsAmount / 100;
+            this.experiment.LaunchExperiment();
 
-            for (int i = 0; i < this.dataInput.ExperimentsAmount; i++)
+            while (true)
             {
-                if (this.backgroundWorker.CancellationPending)
-                    break;
-
-                if (this.inverseCheckBox.Checked)
-                    this.experiment.ExecuteInverseMethod(AddNewExperimentForm.random.NextDouble();
-                if (this.neymanCheckBox.Checked)
-                    this.experiment.ExecuteNeymanMethod(i, AddNewExperimentForm.random.NextDouble());
-                if (this.metropolisCheckBox.Checked)
-                    this.experiment.ExecuteMetropolisMethod(AddNewExperimentForm.random.NextDouble());
-
-                if (i % step == 0)
-                    ((BackgroundWorker)sender).ReportProgress((i * 100) / this.experiment.DataInput.ExperimentsAmount, this.actualExperimentAmount);
-
-                this.actualExperimentAmount++;
-
-                if (this.pause)
+                if (this.experiment.IsWorkFinished())
                 {
-                    ((BackgroundWorker)sender).ReportProgress((i * 100) / this.experiment.DataInput.ExperimentsAmount, this.actualExperimentAmount);
-
-                    while (this.pause)
-                        if (this.backgroundWorker.CancellationPending)
-                        {
-                            this.pause = false;
-                            return;
-                        }
+                    break;
                 }
             }
         }
@@ -145,21 +115,27 @@ namespace CourseProject
 
         private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            //e.Result
-            //e.Cancelled
-            //e.Error
-            this.experiment.DataInput.ActualExperimentsAmount = this.actualExperimentAmount;
-            this.experiment.FillIntervalsList();
-            this.DrawChart();
+            if (e.Cancelled)
+            {
+                System.Windows.Forms.MessageBox.Show("BackgroundWorker was cancelled!");
+            }
+            else if (!(e.Error == null))
+            {
+                System.Windows.Forms.MessageBox.Show("Error occured during backgroundworker's execution!");
+            }
+            else
+            {
+                this.actualProgressLabel.Text = "Progress (" + this.actualExperimentAmount + "/" + this.dataInput.ExperimentsAmount + ")";
+                this.progressLabel.Text = "Progress (100%)";
+                this.progressBar.Value = 100;
+                this.startButton.Enabled = true;
+                this.saveButton.Enabled = true;
+                this.pauseButton.Text = "PAUSE";
 
-            this.actualProgressLabel.Text = "Progress (" + this.actualExperimentAmount + "/" + this.dataInput.ExperimentsAmount + ")";
-            this.progressLabel.Text = "Progress (100%)";
-            this.progressBar.Value = 100;
-            this.startButton.Enabled = true;
-            this.saveButton.Enabled = true;
-            this.pauseButton.Text = "PAUSE";
+                this.SetButtonsEnable(false);
 
-            this.SetButtonsEnable(false);
+                this.DrawChart();
+            }
         }
 
         private void DrawChart()
@@ -177,37 +153,37 @@ namespace CourseProject
             this.metropolisChart.Series[0].Points.Clear();
             this.metropolisChart.Series[1].Points.Clear();
 
-            if (this.inverseCheckBox.Checked)
+            if (this.dataInput.IsInverseFunctionChecked)
             {
                 this.tabControl.TabPages[0].Enabled = true;
 
                 this.inverseFunctionChart.ChartAreas[0].AxisX.Minimum = this.experiment.DataInput.IntervalBegin;
                 this.inverseFunctionChart.ChartAreas[0].AxisX.Maximum = this.experiment.DataInput.IntervalEnd;
 
-                this.inverseFunctionChart.Series[0].Points.DataBindXY(this.experiment.AnalyticMethodObj.GetIntervalsList(), this.experiment.AnalyticMethodObj.GetResultList());
-                this.inverseFunctionChart.Series[1].Points.DataBindXY(this.experiment.InverseFunctionMethodObj.GetIntervalsList(), this.experiment.InverseFunctionMethodObj.GetResultList());
+                this.inverseFunctionChart.Series[0].Points.DataBindXY(this.experiment.GetAnalyticIntervalsList(inverseFunctionString), this.experiment.GetAnalyticResultList(inverseFunctionString));
+                this.inverseFunctionChart.Series[1].Points.DataBindXY(this.experiment.GetIntervalsList(inverseFunctionString), this.experiment.GetResultList(inverseFunctionString));
             }
 
-            if (this.neymanCheckBox.Checked)
+            if (this.dataInput.IsNeymanChecked)
             {
                 this.tabControl.TabPages[1].Enabled = true;
 
                 this.neymanChart.ChartAreas[0].AxisX.Minimum = this.experiment.DataInput.IntervalBegin;
                 this.neymanChart.ChartAreas[0].AxisX.Maximum = this.experiment.DataInput.IntervalEnd;
 
-                this.neymanChart.Series[0].Points.DataBindXY(this.experiment.AnalyticMethodObj.GetIntervalsList(), this.experiment.AnalyticMethodObj.GetResultList());
-                this.neymanChart.Series[1].Points.DataBindXY(this.experiment.NeymanMethodObj.GetIntervalsList(), this.experiment.NeymanMethodObj.GetResultList());
+                this.neymanChart.Series[0].Points.DataBindXY(this.experiment.GetAnalyticIntervalsList(neymanString), this.experiment.GetAnalyticResultList(neymanString));
+                this.neymanChart.Series[1].Points.DataBindXY(this.experiment.GetIntervalsList(neymanString), this.experiment.GetResultList(neymanString));
             }
 
-            if (this.metropolisCheckBox.Checked)
+            if (this.dataInput.IsMetropolisChecked)
             {
                 this.tabControl.TabPages[2].Enabled = true;
 
                 this.metropolisChart.ChartAreas[0].AxisX.Minimum = this.experiment.DataInput.IntervalBegin;
                 this.metropolisChart.ChartAreas[0].AxisX.Maximum = this.experiment.DataInput.IntervalEnd;
 
-                this.metropolisChart.Series[0].Points.DataBindXY(this.experiment.AnalyticMethodObj.GetIntervalsList(), this.experiment.AnalyticMethodObj.GetResultList());
-                this.metropolisChart.Series[1].Points.DataBindXY(this.experiment.MetropolisMethodObj.GetIntervalsList(), this.experiment.MetropolisMethodObj.GetResultList());
+                this.metropolisChart.Series[0].Points.DataBindXY(this.experiment.GetAnalyticIntervalsList(metropolisString), this.experiment.GetAnalyticResultList(metropolisString));
+                this.metropolisChart.Series[1].Points.DataBindXY(this.experiment.GetIntervalsList(metropolisString), this.experiment.GetResultList(metropolisString));
             }
         }
 
@@ -227,7 +203,7 @@ namespace CourseProject
 
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    formatter.Serialize(ms, this.experiment.DataInput);
+                    /*formatter.Serialize(ms, this.experiment.DataInput);
                     serializedDataInput = ms.ToArray();
 
                     formatter.Serialize(ms, this.experiment.AnalyticMethodObj);
@@ -240,7 +216,7 @@ namespace CourseProject
                     serializedNeymanMethod = ms.ToArray();
 
                     formatter.Serialize(ms, this.experiment.MetropolisMethodObj);
-                    serializedMetropolisMethod = ms.ToArray();
+                    serializedMetropolisMethod = ms.ToArray();*/
                 }
 
                 using (SQLiteCommand command = connection.CreateCommand())
@@ -252,12 +228,12 @@ namespace CourseProject
 
                     command.CommandText = "INSERT INTO experiment (id, input, analytic, inverse, neyman, metropolis) " +
                         "VALUES (null, @input, @analytic, @inverse, @neyman, @metropolis);";
-
+                    /*
                     parameterList[0] = new SQLiteParameter("input", serializedDataInput);
                     parameterList[1] = new SQLiteParameter("analytic", serializedAnalyticMethod);
                     parameterList[2] = new SQLiteParameter("inverse", serializedInverseMethod);
                     parameterList[3] = new SQLiteParameter("neyman", serializedNeymanMethod);
-                    parameterList[4] = new SQLiteParameter("metropolis", serializedMetropolisMethod);
+                    parameterList[4] = new SQLiteParameter("metropolis", serializedMetropolisMethod);*/
 
                     for (int i = 0; i < 5; i++)
                         command.Parameters.Add(parameterList[i]);
