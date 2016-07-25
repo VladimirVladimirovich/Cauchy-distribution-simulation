@@ -27,9 +27,9 @@ namespace CourseProject
                 this.InsertNewValue(value);
         }
 
-        protected override void Dispose(bool disposing)
+        protected override void OnDispose()
         {
-            base.Dispose(disposing);
+
         }
         #endregion
     }

@@ -89,7 +89,7 @@ namespace CourseProject
         #region Protected methods
         protected abstract void ExecuteMethod();
 
-        protected void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             for (int i = 0; i < this.experimentsAmount; i++)
             {
@@ -100,12 +100,12 @@ namespace CourseProject
             }
         }
 
-        protected void BackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        private void BackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
 
         }
 
-        protected void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             if (e.Cancelled)
             {
@@ -157,24 +157,16 @@ namespace CourseProject
         {
             for (double i = this.intervalBegin; i < this.intervalEnd; i += this.intervalDelta)
             {
-                this.IntervalsList.Add(i);
+                this.intervalsList.Add(i);
             }
 
-            if (this.ResultList.Count != this.IntervalsList.Count)
-                this.IntervalsList.RemoveAt(this.IntervalsList.Count - 1);
+            if (this.resultList.Count != this.intervalsList.Count)
+                this.intervalsList.RemoveAt(this.intervalsList.Count - 1);
         }
 
-        protected virtual void Dispose(bool disposing)
+        protected virtual void OnDispose()
         {
-            if (this.disposed)
-                return;
-
-            if (disposing)
-            {
-                this.worker.Dispose();
-            }
-
-            this.disposed = true;
+            
         }
         #endregion
 
@@ -186,7 +178,7 @@ namespace CourseProject
                 return this.isWorkFinished;
             }
         }
-        public List<double> ResultList
+        public IEnumerable<double> ResultList
         {
             get
             {
@@ -195,7 +187,7 @@ namespace CourseProject
             }
         }
 
-        public List<double> IntervalsList
+        public IEnumerable<double> IntervalsList
         {
             get
             {
@@ -223,8 +215,27 @@ namespace CourseProject
         #region Public methods
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            try
+            {
+                if (this.disposed)
+                    return;
+
+                try
+                {
+                    this.OnDispose();
+                }
+                catch (Exception e) 
+                {
+                    System.Console.WriteLine(e.Message); 
+                }
+
+                this.worker.Dispose();
+            }
+            finally
+            {
+                this.disposed = true;
+                GC.SuppressFinalize(this);
+            }
         }
 
         public void RunBackgroundWorker()

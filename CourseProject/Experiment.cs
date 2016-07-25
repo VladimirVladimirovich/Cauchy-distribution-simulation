@@ -37,7 +37,10 @@ namespace CourseProject
                 {
                     pair.Value.Dispose();
                 }
-                catch (Exception e) { System.Console.WriteLine(e.Message); }
+                catch (Exception e) 
+                { 
+                    System.Console.WriteLine(e.Message); 
+                }
             }
         } 
         #endregion
