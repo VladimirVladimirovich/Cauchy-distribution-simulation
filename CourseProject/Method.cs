@@ -7,7 +7,6 @@ using System.ComponentModel;
 
 namespace CourseProject
 {
-    [Serializable]
     public abstract class Method : IDisposable
     {
         #region Private fields
@@ -255,6 +254,7 @@ namespace CourseProject
             }
             finally
             {
+                this.OnComplete = null;
                 this.disposed = true;
                 GC.SuppressFinalize(this);
             }

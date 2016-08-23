@@ -14,6 +14,9 @@ namespace CourseProject
 {
     public partial class AddNewExperimentForm : Form
     {
+        public delegate void DrawChartDelegate(string methodName);
+        public DrawChartDelegate drawChartDelegate;
+
         #region Private fields
         private MainForm mainForm;
         private DataInput dataInput;
@@ -33,6 +36,7 @@ namespace CourseProject
         {
             InitializeComponent();
             mainForm = form;
+            this.drawChartDelegate = new DrawChartDelegate(DrawChart);
         } 
         #endregion
 
@@ -52,7 +56,7 @@ namespace CourseProject
             this.startButton.Enabled = false;
             this.saveButton.Enabled = false;
 
-            this.experiment = new Experiment(this.dataInput);
+            this.experiment = new Experiment(this, this.dataInput);
             this.experiment.DrawChart += this.DrawChart;
 
             this.backgroundWorker.RunWorkerAsync();
@@ -135,14 +139,14 @@ namespace CourseProject
             this.tabControl.TabPages[1].Enabled = false;
             this.tabControl.TabPages[2].Enabled = false;
 
-            this.inverseFunctionChart.Series[0].Points.Clear();
+            /*this.inverseFunctionChart.Series[0].Points.Clear();
             this.inverseFunctionChart.Series[1].Points.Clear();
 
             this.neymanChart.Series[0].Points.Clear();
             this.neymanChart.Series[1].Points.Clear();
 
             this.metropolisChart.Series[0].Points.Clear();
-            this.metropolisChart.Series[1].Points.Clear();
+            this.metropolisChart.Series[1].Points.Clear();*/
 
             if (methodName.Equals(AddNewExperimentForm.inverseFunctionString))
             {

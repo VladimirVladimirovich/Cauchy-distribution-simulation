@@ -9,6 +9,7 @@ namespace CourseProject
     public class Experiment
     {
         #region Private fields
+        private AddNewExperimentForm form;
         private DataInput dataInput;
         private Dictionary<string, Method> methods;
 
@@ -18,8 +19,9 @@ namespace CourseProject
         #endregion
 
         #region Constructor
-        public Experiment(DataInput dataInput)
+        public Experiment(AddNewExperimentForm form, DataInput dataInput)
         {
+            this.form = form;
             this.dataInput = dataInput;
             this.methods = new Dictionary<string, Method>();
 
@@ -42,23 +44,6 @@ namespace CourseProject
                 this.methods.Add(metropolisStringKey, metropolisMethod);
             }
         }
-        #endregion
-
-        #region Private methods
-        private void DisposeBackgroundWorkers()
-        {
-            foreach (KeyValuePair<string, Method> pair in this.methods)
-            {
-                try
-                {
-                    pair.Value.Dispose();
-                }
-                catch (Exception e) 
-                { 
-                    System.Console.WriteLine(e.Message); 
-                }
-            }
-        } 
         #endregion
 
         public delegate void DrawChartEventHandler(String methodName);
@@ -93,18 +78,8 @@ namespace CourseProject
 
         public void MethodWorkComplete(Method sender)
         {
-            if (sender.IsCancelled)
-            {
-                
-            }
-            else if (sender.Error != null)
-            {
-                
-            }
-            else
-            {
-                DrawChart(sender.Name);
-            }
+            this.form.Invoke(this.form.drawChartDelegate, new object [] { sender.Name } );
+            //sender.Dispose();
         }
 
         public IEnumerable<double> GetResultList(string methodName)
@@ -128,7 +103,6 @@ namespace CourseProject
 
             if (this.methods.TryGetValue(methodName, out method))
             {
-
                 return method.IntervalsList;
             }
             else

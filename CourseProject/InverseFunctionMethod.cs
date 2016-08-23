@@ -26,11 +26,6 @@ namespace CourseProject
             if (value > this.intervalBegin && value < this.intervalEnd)
                 this.InsertNewValue(value);
         }
-
-        protected override void OnDispose()
-        {
-
-        }
         #endregion
     }
 }

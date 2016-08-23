@@ -153,7 +153,7 @@ namespace CourseProject
                                 this.metropolisMethod = (MetropolisMethod)formatter.Deserialize(ms);
 
                                 this.idList.Add(int.Parse(reader["id"].ToString()));
-                                this.experimentsList.Add(new Experiment(dataInput));
+                                //this.experimentsList.Add(new Experiment(dataInput));
                             }
                         }
                     }

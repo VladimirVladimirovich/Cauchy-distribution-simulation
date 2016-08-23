@@ -25,7 +25,7 @@ namespace CourseProject
         {
             InitializeComponent();
 
-            this.experiment = new Experiment(dataInput);
+            //this.experiment = new Experiment(this, dataInput);
 
             AddDataInput();
             DrawChart();

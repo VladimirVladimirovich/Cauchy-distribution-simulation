@@ -52,11 +52,6 @@ namespace CourseProject
                 }
             }
         }
-
-        protected override void OnDispose()
-        {
-
-        }
         #endregion
     }
 }

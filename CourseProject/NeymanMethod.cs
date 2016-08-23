@@ -64,11 +64,6 @@ namespace CourseProject
             if (analyticValue > maxValue)
                 this.InsertNewValue(value);
         }
-
-        protected override void OnDispose()
-        {
-            
-        }
         #endregion
     }
 }
